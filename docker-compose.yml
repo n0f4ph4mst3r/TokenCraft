@@ -1,0 +1,41 @@
+services:
+  sso:
+    container_name: TokenCraft
+    build:
+      context: .
+      dockerfile: dockerfile
+
+    environment:
+      HTTP_SERVER_ADDRESS: 0.0.0.0
+      HTTP_SERVER_PORT: 8080
+      CONFIG_PATH: /config/config.yaml
+      DATABASE_URL: ${DATABASE_URL}
+      CACHE_URL: ${CACHE_URL}
+    volumes:
+      - ${CONFIG_PATH}:/config/config.yaml:ro
+    ports:
+      - "${HTTP_SERVER_PORT}:${HTTP_SERVER_PORT}"
+
+  postgres:
+    image: postgres:18-alpine
+    container_name: tokencraft_db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      retries: 5
+    volumes:
+      - pgdata:/var/lib/postgresql
+    ports:
+    - "${POSTGRES_PORT}:${POSTGRES_PORT}"
+
+  redis:
+    image: valkey/valkey:9.0.3
+    container_name: tokencraft_cache
+    command: ["valkey-server"]
+
+volumes:
+  pgdata:

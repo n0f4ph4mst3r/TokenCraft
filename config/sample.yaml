@@ -1,0 +1,9 @@
+env: "local"
+access_token_ttl: 1h
+refresh_token_ttl: 168h
+
+cache_config:
+  ttl: 30m
+  reverse_index_ttl: 30m
+  prefix_url: "url:"
+  prefix_rev: "rev:"

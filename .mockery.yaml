@@ -1,0 +1,89 @@
+all: false
+force-file-write: true
+formatter: goimports
+generate: true
+include-auto-generated: false
+log-level: info
+recursive: false
+require-template-schema-exists: true
+template: testify
+template-schema: '{{.Template}}.schema.json'
+pkgname: '{{.InterfaceName}}_mocks'
+filename: mocks_test.go
+
+packages:
+  github.com/n0f4ph4mst3r/TokenCraft/internal/services:
+    interfaces:
+      AuthProvider: 
+        config: &providers-config
+            dir: '{{.InterfaceDir}}/mocks/providers/auth'
+            filename: '{{.InterfaceName}}_mock.go'
+            structname: 'Mock{{.InterfaceName}}'
+
+      UserProvider:
+        config:
+          <<: *providers-config
+          dir: '{{.InterfaceDir}}/mocks/providers/user'
+
+      AppProvider:
+        config:
+          <<: *providers-config
+          dir: '{{.InterfaceDir}}/mocks/providers/app'
+
+      TokenProvider:
+        config:
+          <<: *providers-config
+          dir: '{{.InterfaceDir}}/mocks/providers/token'
+
+  github.com/n0f4ph4mst3r/TokenCraft/internal/services/helpers/signer:
+      interfaces:
+        TokenSigner:
+          config:
+            dir: '{{.InterfaceDir}}/../../mocks/helpers/signer'
+            filename: '{{.InterfaceName}}_mock.go'
+            structname: 'Mock{{.InterfaceName}}'
+
+  github.com/n0f4ph4mst3r/TokenCraft/internal/services/helpers/hasher:
+      interfaces:
+        Hasher:
+          config:
+            dir: '{{.InterfaceDir}}/../../mocks/helpers/hasher'
+            filename: '{{.InterfaceName}}_mock.go'
+            structname: 'Mock{{.InterfaceName}}'
+
+  github.com/n0f4ph4mst3r/TokenCraft/internal/grpc/auth:
+    interfaces:
+      AuthService:
+          config:
+            dir: '{{.InterfaceDir}}/mocks'
+            filename: '{{.InterfaceName}}_mock.go'
+            structname: 'Mock{{.InterfaceName}}'
+  
+  github.com/n0f4ph4mst3r/TokenCraft/internal/repo:
+    interfaces:
+      DbProvider: 
+        config: &providers-config
+            dir: '{{.InterfaceDir}}/mocks/storage'
+            filename: '{{.InterfaceName}}_mock.go'
+            structname: 'Mock{{.InterfaceName}}'
+
+      UserProvider:
+        config:
+          <<: *providers-config
+          dir: '{{.InterfaceDir}}/mocks/user'
+
+      AppProvider:
+        config:
+          <<: *providers-config
+          dir: '{{.InterfaceDir}}/mocks/app'
+
+      TokenProvider:
+        config:
+          <<: *providers-config
+          dir: '{{.InterfaceDir}}/mocks/token'
+      
+      CacheProvider:
+        config:
+          <<: *providers-config
+          dir: '{{.InterfaceDir}}/mocks/cache'
+        

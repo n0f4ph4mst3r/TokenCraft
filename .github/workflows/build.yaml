@@ -1,0 +1,46 @@
+name: Build and Push Docker Image
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    env:
+      CONFIG_PATH: ./config/sample.yaml
+
+      HTTP_SERVER_ADDRESS: "0.0.0.0"
+      HTTP_SERVER_PORT: "8080"
+
+      APP_SECRET: "random_secretkey123"
+
+      DATABASE_URL: "postgres://postgres:test@postgres:5432/main?sslmode=disable"
+      CACHE_URL: "redis://redis:6379/0"
+
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "test"
+      POSTGRES_DB: "main"
+      POSTGRES_PORT: "5432"
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Compose
+        uses: docker/setup-compose-action@v1
+
+      - name: Build images
+        run: docker compose build
+
+      - name: Start services locally
+        run: |
+          docker compose up -d
+          echo "⏳ Waiting for services to boot..."
+          sleep 10
+
+      - name: Shutdown compose
+        if: always()
+        run: docker compose down
