@@ -1,0 +1,52 @@
+name: Build and Push Docker Image
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Compose
+        uses: docker/setup-compose-action@v1
+
+      - name: Load Environment Variables
+        run: cp .env.sample .env
+
+      - name: Build images
+        run: docker compose build
+
+      - name: Start services locally
+        run: |
+          docker compose up -d
+          echo "⏳ Waiting for services to boot..."
+          sleep 10
+
+      - name: Run tests 
+        run: |
+          sudo docker compose exec sso sh -c "go test -v -failfast -count=1 ./tests/... | grep -v '\[no test files\]'"
+
+      - name: Shutdown compose
+        if: always()
+        run: docker compose down
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GHCR_PAT }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ghcr.io/n0f4ph4mst3r/tokencraft:latest

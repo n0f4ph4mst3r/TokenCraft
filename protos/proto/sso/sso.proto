@@ -1,0 +1,69 @@
+syntax = "proto3";
+
+package auth;
+
+option go_package = "github.com/n0f4ph4mst3r/TokenCraft/protos/proto/sso;ssov1";
+
+service Auth {
+    rpc RegisterUser(RegisterRequest) returns (RegisterResponse);
+    rpc Login(LoginRequest) returns (LoginResponse);
+    rpc Logout(LogoutRequest) returns (LogoutResponse);
+    rpc RefreshToken(RefreshTokenRequest) returns (RefreshTokenResponse);
+    rpc RoleCheck(RoleCheckRequest) returns (RoleCheckResponse);
+}
+
+message RegisterRequest {
+    string email = 1;
+    string username = 2;
+    string password = 3;
+}
+
+message RegisterResponse {
+    string user_id = 1;
+    string username = 2;
+    string email = 3;
+}
+
+message LoginRequest {
+    string email = 1;
+    string password = 2;
+    int64 app_id = 3;
+}
+
+message LoginResponse {
+    string user_id = 1;
+    string username = 2;
+    string email = 3;
+    string access_token = 4;
+    string refresh_token = 5;
+    int64 access_token_expires_in = 6;
+    int64 refresh_token_expires_in = 7;
+}
+
+message LogoutRequest {
+    string refresh_token = 1;
+}
+
+message LogoutResponse {
+    string message = 1;
+}
+
+message RefreshTokenRequest {
+    string refresh_token = 1;
+}
+
+message RefreshTokenResponse {
+    string access_token = 1;
+    string refresh_token = 2;
+    int64 access_token_expires_in = 6;
+    int64 refresh_token_expires_in = 7;
+}
+
+message RoleCheckRequest {
+    string refresh_token = 1;
+    string required_role = 2;
+}
+
+message RoleCheckResponse {
+    bool pass_check = 1;
+}

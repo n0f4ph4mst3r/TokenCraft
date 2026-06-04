@@ -1,0 +1,52 @@
+all: false
+force-file-write: true
+formatter: goimports
+generate: true
+include-auto-generated: false
+log-level: info
+recursive: false
+require-template-schema-exists: true
+template: testify
+template-schema: '{{.Template}}.schema.json'
+pkgname: "mocks"
+filename: "{{.InterfaceName}}.go"
+structname: '{{.Mock}}{{.InterfaceName}}'
+
+packages:
+  packages:
+  github.com/n0f4ph4mst3r/TokenCraft/internal/services:
+    config:
+      dir: "tests/services/mocks/providers"
+    interfaces:
+      AuthProvider:
+      UserProvider:
+      AppProvider:
+      TokenProvider:
+
+  github.com/n0f4ph4mst3r/TokenCraft/internal/services/helpers/signer:
+    config:
+      dir: "tests/services/mocks/helpers"
+    interfaces:
+      TokenSigner:
+
+  github.com/n0f4ph4mst3r/TokenCraft/internal/services/helpers/hasher:
+    config:
+      dir: "tests/services/mocks/helpers"
+    interfaces:
+      Hasher:
+
+  github.com/n0f4ph4mst3r/TokenCraft/internal/grpc/auth:
+    config:
+      dir: "tests/grpc/auth/mocks"
+    interfaces:
+      AuthService:
+
+  github.com/n0f4ph4mst3r/TokenCraft/internal/repo:
+    config:
+      dir: "tests/repo/mocks"
+    interfaces:
+      DbProvider: 
+      UserProvider:
+      AppProvider:
+      TokenProvider:
+      CacheProvider:

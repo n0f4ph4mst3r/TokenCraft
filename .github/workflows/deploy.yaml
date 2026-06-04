@@ -1,0 +1,52 @@
+name: Deploy
+
+on:
+  workflow_dispatch
+
+jobs:
+  deploy:
+    runs-on: ubuntu-24.04
+    environment: production
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: install ssh keys
+        run: |
+          install -m 600 -D /dev/null ~/.ssh/id_rsa
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          echo "${{ secrets.SSH_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+
+      - name: Verify known_hosts
+        run: cat ~/.ssh/known_hosts
+
+      - name: create docker compose config
+        run: envsubst < docker-compose.yml > docker-compose-secret.yml
+        env:
+          HTTP_SERVER_PORT: ${{ secrets.HTTP_SERVER_PORT }}
+          CONFIG_PATH: ${{ secrets.CONFIG_PATH }}
+          APP_SECRET: ${{ secrets.APP_SECRET }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          CACHE_URL: ${{ secrets.CACHE_URL }}
+          
+          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+          POSTGRES_PORT: ${{ secrets.POSTGRES_PORT }}
+
+      - name: copy docker compose config
+        run: scp -i ~/.ssh/id_rsa -P ${{ secrets.SSH_PORT }} docker-compose-secret.yml ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:docker-compose.yml
+
+      - name: connect and pull
+        run: ssh -i ~/.ssh/id_rsa -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "docker compose pull && docker compose up -d && exit"
+
+      - name: cleanup old images
+        if: always()
+        run: |
+          ssh -i ~/.ssh/id_rsa -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "
+            docker image prune -f
+          "
+
+      - name: cleanup keys
+        if: always()
+        run: rm -rf ~/.ssh 
